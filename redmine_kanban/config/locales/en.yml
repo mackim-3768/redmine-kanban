@@ -1,0 +1,6 @@
+en:
+  label_kanban: "Kanban"
+  permission_view_kanban: "View Kanban board"
+  permission_manage_kanban: "Move issues on Kanban board"
+  error_status_not_allowed: "This status transition is not allowed by the workflow"
+  project_module_kanban: "Kanban"

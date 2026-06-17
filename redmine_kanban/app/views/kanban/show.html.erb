@@ -1,0 +1,57 @@
+<% content_for :header_tags do %>
+  <%= stylesheet_link_tag 'kanban', plugin: 'redmine_kanban' %>
+  <%= javascript_include_tag 'kanban', plugin: 'redmine_kanban' %>
+<% end %>
+
+<div class="contextual"></div>
+<h2><%= l(:label_kanban) %></h2>
+
+<%= form_tag(project_kanban_path(@project), method: :get, id: 'kanban-filters', class: 'kanban-filters') do %>
+  <span class="kb-filter">
+    <label><%= l(:field_tracker) %></label>
+    <%= select_tag :tracker_id,
+          options_for_select([[l(:label_all), '']] + @trackers.map { |t| [t.name, t.id.to_s] }, @selected_tracker),
+          onchange: 'this.form.submit()' %>
+  </span>
+  <span class="kb-filter">
+    <label><%= l(:field_assigned_to) %></label>
+    <%= select_tag :assigned_to_id,
+          options_for_select(
+            [[l(:label_all), '']] +
+            @assignee_options.map { |u| [(u == User.current ? "#{u.name} (#{l(:label_me)})" : u.name), u.id.to_s] },
+            @selected_assignee),
+          onchange: 'this.form.submit()' %>
+  </span>
+<% end %>
+
+<div class="kanban-board"
+     data-update-url="<%= project_kanban_update_issue_path(@project) %>"
+     data-issue-base="<%= url_for(controller: 'issues', action: 'show', id: '__ID__', only_path: true) %>"
+     data-can-manage="<%= User.current.allowed_to?(:manage_kanban, @project) %>">
+  <% @statuses.each do |status| %>
+    <% issues = @issues_by_status[status.id] || [] %>
+    <div class="kanban-column" data-status-id="<%= status.id %>">
+      <div class="kanban-column-header">
+        <span class="kb-col-name"><%= status.name %></span>
+        <span class="kb-col-count"><%= issues.size %></span>
+      </div>
+      <div class="kanban-column-body">
+        <% issues.each do |issue| %>
+          <%= render partial: 'card', locals: { issue: issue } %>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<div id="kanban-panel" class="kanban-panel" aria-hidden="true">
+  <div class="kb-panel-resizer" title="<%= l(:label_kanban) %>"></div>
+  <div class="kb-panel-header">
+    <a class="kb-panel-open" href="#" target="_blank" rel="noopener" title="<%= l(:button_view) %>">⤢</a>
+    <span class="kb-panel-title"></span>
+    <button type="button" class="kb-panel-close" aria-label="close">✕</button>
+  </div>
+  <div class="kb-panel-loading"><%= l(:label_loading) rescue 'Loading…' %></div>
+  <iframe class="kb-panel-frame" title="issue" referrerpolicy="same-origin"></iframe>
+</div>
+<div id="kanban-panel-backdrop" class="kanban-panel-backdrop" hidden></div>

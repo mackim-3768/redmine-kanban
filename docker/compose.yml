@@ -1,0 +1,37 @@
+name: redmine-kanban
+
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: redmine
+      POSTGRES_USER: redmine
+      POSTGRES_PASSWORD: redmine
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U redmine"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redmine:
+    image: redmine:5.1.3
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "3001:3000"
+    environment:
+      REDMINE_DB_POSTGRES: db
+      REDMINE_DB_DATABASE: redmine
+      REDMINE_DB_USERNAME: redmine
+      REDMINE_DB_PASSWORD: redmine
+      REDMINE_SECRET_KEY_BASE: supersecretkeybase_for_local_testing_only_0123456789
+    volumes:
+      - ../redmine_kanban:/usr/src/redmine/plugins/redmine_kanban:ro
+      - files:/usr/src/redmine/files
+
+volumes:
+  db-data:
+  files:

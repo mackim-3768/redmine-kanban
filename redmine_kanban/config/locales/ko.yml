@@ -1,0 +1,6 @@
+ko:
+  label_kanban: "칸반"
+  permission_view_kanban: "칸반 보드 보기"
+  permission_manage_kanban: "칸반 보드에서 이슈 이동"
+  error_status_not_allowed: "워크플로우에서 허용하지 않는 상태 전환입니다"
+  project_module_kanban: "칸반"
