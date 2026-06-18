@@ -28,16 +28,18 @@
      data-update-url="<%= project_kanban_update_issue_path(@project) %>"
      data-issue-base="<%= url_for(controller: 'issues', action: 'show', id: '__ID__', only_path: true) %>"
      data-can-manage="<%= User.current.allowed_to?(:manage_kanban, @project) %>">
-  <% @statuses.each do |status| %>
-    <% issues = @issues_by_status[status.id] || [] %>
-    <div class="kanban-column" data-status-id="<%= status.id %>">
+  <% @columns.each do |col| %>
+    <% issues = @issues_by_column[col[:key]] || [] %>
+    <div class="kanban-column<%= ' kb-col-readonly' if col[:commit_id].nil? %>"
+         data-col-key="<%= col[:key] %>"
+         data-commit-status="<%= col[:commit_id] %>">
       <div class="kanban-column-header">
-        <span class="kb-col-name"><%= status.name %></span>
+        <span class="kb-col-name"><%= col[:name] %></span>
         <span class="kb-col-count"><%= issues.size %></span>
       </div>
       <div class="kanban-column-body">
         <% issues.each do |issue| %>
-          <%= render partial: 'card', locals: { issue: issue } %>
+          <%= render partial: 'card', locals: { issue: issue, col_key: col[:key] } %>
         <% end %>
       </div>
     </div>

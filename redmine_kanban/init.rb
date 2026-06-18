@@ -10,6 +10,10 @@ Redmine::Plugin.register :redmine_kanban do
 
   requires_redmine version_or_higher: '5.0.0'
 
+  # Optional status -> column grouping. Empty = one column per status.
+  settings default: { 'column_map' => '' },
+           partial: 'settings/redmine_kanban'
+
   project_module :kanban do
     permission :view_kanban, { kanban: [:show] }, read: true
     permission :manage_kanban, { kanban: [:update_issue] }

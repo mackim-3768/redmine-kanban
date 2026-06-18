@@ -163,10 +163,13 @@
         e.preventDefault();
         col.classList.remove('drop-target');
         if (!dragged) return;
-        var newStatus = col.getAttribute('data-status-id');
-        var oldStatus = dragged.getAttribute('data-status-id');
-        if (newStatus === oldStatus) return;
-        commit(dragged, newStatus, oldStatus);
+        var targetCol = col.getAttribute('data-col-key');
+        var sourceCol = dragged.getAttribute('data-col-key');
+        var commitStatus = col.getAttribute('data-commit-status');
+        // read-only column (e.g. "Other") has no commit target → bounce back
+        if (!commitStatus) { revert(dragged, sourceCol); return; }
+        if (targetCol === sourceCol) return;
+        commit(dragged, targetCol, sourceCol, commitStatus);
       });
     });
 
@@ -185,12 +188,12 @@
       return closest.el;
     }
 
-    function commit(card, newStatus, oldStatus) {
+    function commit(card, targetCol, sourceCol, commitStatus) {
       var issueId = card.getAttribute('data-issue-id');
       card.classList.add('saving');
       var data = new URLSearchParams();
       data.append('id', issueId);
-      data.append('status_id', newStatus);
+      data.append('status_id', commitStatus);
 
       fetch(updateUrl, {
         method: 'POST',
@@ -206,22 +209,23 @@
         .then(function (res) {
           card.classList.remove('saving');
           if (res.ok && res.body.ok) {
-            card.setAttribute('data-status-id', newStatus);
+            card.setAttribute('data-col-key', targetCol);
+            card.setAttribute('data-status-id', res.body.status_id);
             recount();
           } else {
-            revert(card, oldStatus);
+            revert(card, sourceCol);
             alert((res.body && res.body.error) || 'Update failed');
           }
         })
         .catch(function () {
           card.classList.remove('saving');
-          revert(card, oldStatus);
+          revert(card, sourceCol);
           alert('Network error');
         });
     }
 
-    function revert(card, oldStatus) {
-      var origin = board.querySelector('.kanban-column[data-status-id="' + oldStatus + '"] .kanban-column-body');
+    function revert(card, sourceCol) {
+      var origin = board.querySelector('.kanban-column[data-col-key="' + sourceCol + '"] .kanban-column-body');
       if (origin) origin.appendChild(card);
       recount();
     }

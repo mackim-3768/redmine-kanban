@@ -1,7 +1,9 @@
 <div class="kanban-card priority-<%= issue.priority.try(:position) %>"
      draggable="true"
      data-issue-id="<%= issue.id %>"
-     data-status-id="<%= issue.status_id %>">
+     data-col-key="<%= col_key %>"
+     data-status-id="<%= issue.status_id %>"
+     title="<%= issue.status.name %>">
   <div class="kb-card-top">
     <span class="kb-tracker tracker-<%= issue.tracker_id %>"><%= issue.tracker.name %></span>
     <span class="kb-id">#<%= issue.id %></span>

@@ -8,7 +8,7 @@ class KanbanController < ApplicationController
 
   def show
     @trackers = @project.trackers.sorted
-    @statuses = workflow_statuses
+    @columns = build_columns
 
     # Defaults on first load (no filter submitted): tracker = all, assignee = me.
     # Once the filter form is submitted, params are present (empty string = "all").
@@ -24,11 +24,25 @@ class KanbanController < ApplicationController
     scope = scope.where(tracker_id: @selected_tracker) if @selected_tracker.present?
     scope = scope.where(assigned_to_id: @selected_assignee) if @selected_assignee.present?
 
-    @issues_by_status = Hash.new { |h, k| h[k] = [] }
+    # Map each status id to the column that owns it.
+    status_to_col = {}
+    @columns.each { |c| c[:status_ids].each { |sid| status_to_col[sid] ||= c[:key] } }
+
+    @issues_by_column = Hash.new { |h, k| h[k] = [] }
+    unmapped = []
     scope.find_each do |issue|
-      @issues_by_status[issue.status_id] << issue
+      key = status_to_col[issue.status_id]
+      key ? (@issues_by_column[key] << issue) : (unmapped << issue)
     end
-    @issues_by_status.each_value do |list|
+
+    # Never lose issues: statuses not covered by the column map fall into a
+    # read-only "Other" column (no commit target, so it is not a drop zone).
+    if unmapped.any?
+      @columns << { key: 'other', name: l(:label_kanban_other), status_ids: [], commit_id: nil }
+      @issues_by_column['other'] = unmapped
+    end
+
+    @issues_by_column.each_value do |list|
       list.sort_by! { |i| [-(i.priority.try(:position) || 0), i.id] }
     end
 
@@ -71,6 +85,44 @@ class KanbanController < ApplicationController
   end
 
   private
+
+  # Build the board columns. Without a configured column_map, every workflow
+  # status becomes its own column (original behaviour). With a column_map, the
+  # listed statuses are grouped into the named buckets; dropping a card into a
+  # bucket sets the issue to that bucket's `commit_to` status.
+  #
+  # Each column: { key:, name:, status_ids: [Integer], commit_id: Integer|nil }
+  def build_columns
+    raw = Setting.plugin_redmine_kanban['column_map'].to_s.strip
+    return per_status_columns(workflow_statuses) if raw.empty?
+
+    parsed = begin
+      YAML.safe_load(raw)
+    rescue => e
+      Rails.logger.warn("redmine_kanban: invalid column_map YAML: #{e.message}")
+      nil
+    end
+    unless parsed.is_a?(Array)
+      flash.now[:warning] = 'Kanban: column_map is not valid YAML; falling back to one column per status.'
+      return per_status_columns(workflow_statuses)
+    end
+
+    by_name = IssueStatus.all.index_by { |s| s.name.to_s.downcase }
+    cols = []
+    parsed.each_with_index do |c, i|
+      next unless c.is_a?(Hash)
+      sids = Array(c['statuses']).map { |n| by_name[n.to_s.strip.downcase]&.id }.compact.uniq
+      commit = by_name[c['commit_to'].to_s.strip.downcase]&.id || sids.first
+      next unless commit
+      cols << { key: "c#{i}", name: c['name'].to_s.presence || "Column #{i + 1}",
+                status_ids: sids, commit_id: commit }
+    end
+    cols.presence || per_status_columns(workflow_statuses)
+  end
+
+  def per_status_columns(statuses)
+    statuses.map { |s| { key: "s#{s.id}", name: s.name, status_ids: [s.id], commit_id: s.id } }
+  end
 
   # Statuses to render as columns: union of statuses used by project trackers'
   # workflows plus statuses already present on issues, ordered by position.

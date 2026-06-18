@@ -1,0 +1,26 @@
+<div class="box tabular settings">
+  <p>
+    <label for="settings_column_map"><%= l(:label_kanban_column_map) %></label>
+    <%= text_area_tag 'settings[column_map]', settings['column_map'],
+          rows: 14, cols: 70, style: 'font-family:monospace;', id: 'settings_column_map' %>
+    <em class="info">
+      <%= l(:text_kanban_column_map_help) %>
+    </em>
+  </p>
+
+  <fieldset class="box">
+    <legend><%= l(:label_kanban_column_map_example) %></legend>
+<pre style="margin:0;">- name: Open
+  statuses: [Open, TODO, Planning, Pending]
+  commit_to: Open
+- name: Progress
+  statuses: [Progress, Review, Known Issue]
+  commit_to: Progress
+- name: Close
+  statuses: [Close, Done, Resolve]
+  commit_to: Close</pre>
+    <em class="info">
+      <%= l(:text_kanban_column_map_note) %>
+    </em>
+  </fieldset>
+</div>
