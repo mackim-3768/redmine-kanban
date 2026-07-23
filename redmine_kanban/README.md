@@ -12,7 +12,8 @@ and recorded in the issue journal, respecting the tracker's workflow.
 - HTML5 drag-and-drop (no external JS lib), optimistic UI with revert on failure
 - Workflow-aware: only transitions allowed for the current user are accepted
 - Status change writes a proper journal entry (`status_id: old -> new`)
-- Filter by tracker and assignee
+- Filter by tracker and assignee; hide closed issues older than two weeks
+  (enabled by default)
 - Cards show tracker, id, subject, assignee, target version, due date (overdue
   highlighted), priority accent, and progress bar
 - Permissions: `view_kanban` (read) and `manage_kanban` (move). Without

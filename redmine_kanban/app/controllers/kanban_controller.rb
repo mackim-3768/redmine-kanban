@@ -18,11 +18,13 @@ class KanbanController < ApplicationController
                          else
                            User.current.logged? ? User.current.id.to_s : ''
                          end
+    @hide_old_closed = params.fetch(:hide_old_closed, '1').to_s != '0'
 
     scope = @project.issues.visible
                     .includes(:status, :tracker, :priority, :assigned_to, :fixed_version)
     scope = scope.where(tracker_id: @selected_tracker) if @selected_tracker.present?
     scope = scope.where(assigned_to_id: @selected_assignee) if @selected_assignee.present?
+    scope = hide_old_closed_issues(scope) if @hide_old_closed
 
     # Map each status id to the column that owns it.
     status_to_col = {}
@@ -85,6 +87,20 @@ class KanbanController < ApplicationController
   end
 
   private
+
+  # Keep open issues and recently closed issues on the board. Closed issues
+  # without a closed_on value remain visible because their age is unknown.
+  def hide_old_closed_issues(scope)
+    closed_status_ids = IssueStatus.where(is_closed: true).pluck(:id)
+    return scope if closed_status_ids.empty?
+
+    scope.where(
+      'issues.status_id NOT IN (:closed_status_ids) ' \
+      'OR issues.closed_on IS NULL OR issues.closed_on > :cutoff',
+      closed_status_ids: closed_status_ids,
+      cutoff: 2.weeks.ago
+    )
+  end
 
   # Build the board columns. Without a configured column_map, every workflow
   # status becomes its own column (original behaviour). With a column_map, the

@@ -22,6 +22,13 @@
             @selected_assignee),
           onchange: 'this.form.submit()' %>
   </span>
+  <span class="kb-filter kb-filter-checkbox">
+    <%= hidden_field_tag :hide_old_closed, '0', id: nil %>
+    <label for="hide_old_closed">
+      <%= check_box_tag :hide_old_closed, '1', @hide_old_closed, onchange: 'this.form.submit()' %>
+      <%= l(:label_kanban_hide_old_closed) %>
+    </label>
+  </span>
 <% end %>
 
 <div class="kanban-board"

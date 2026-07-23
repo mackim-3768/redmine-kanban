@@ -5,6 +5,7 @@ ko:
   error_status_not_allowed: "워크플로우에서 허용하지 않는 상태 전환입니다"
   project_module_kanban: "칸반"
   label_kanban_other: "기타"
+  label_kanban_hide_old_closed: "2주 이상 지난 Close 숨기기"
   label_kanban_column_map: "컬럼 매핑 (YAML)"
   label_kanban_column_map_example: "예시"
   text_kanban_column_map_help: "이슈 상태를 보드 컬럼으로 묶습니다. 비우면 상태마다 컬럼 1개. 상태는 이름으로 매칭(대소문자 무시). 'commit_to'는 카드를 그 컬럼에 놓을 때 적용되는 상태입니다."
