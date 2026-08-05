@@ -19,13 +19,11 @@ class KanbanController < ApplicationController
                          else
                            User.current.logged? ? User.current.id.to_s : ''
                          end
-    @hide_old_closed = params.fetch(:hide_old_closed, '1').to_s != '0'
-
     scope = @project.issues.visible
                     .includes(:status, :tracker, :priority, :assigned_to, :fixed_version)
     scope = scope.where(tracker_id: @selected_tracker) if @selected_tracker.present?
     scope = scope.where(assigned_to_id: @selected_assignee) if @selected_assignee.present?
-    scope = hide_old_closed_issues(scope) if @hide_old_closed
+    scope = hide_old_closed_issues(scope)
 
     # Map each status id to the column that owns it.
     status_to_col = {}
@@ -103,15 +101,17 @@ class KanbanController < ApplicationController
     )
   end
 
-  # Insert four read-only history columns immediately after the last configured
-  # column that contains a closed status. The original closed column remains a
-  # drop target and holds issues closed during the current week.
+  # Rename the configured closed column to the current ISO week, then insert
+  # four read-only history columns for the previous completed weeks.
   def add_recent_close_columns(columns)
     close_index = columns.rindex do |column|
       (column[:status_ids] & closed_status_ids).any?
     end
     return columns unless close_index
 
+    columns[close_index] = columns[close_index].merge(
+      name: l(:label_kanban_week_close, week: format('%02d', Time.zone.today.cweek))
+    )
     history_columns = @recent_close_weeks.map do |week|
       {
         key: week[:key],

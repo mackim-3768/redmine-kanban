@@ -1,7 +1,5 @@
 .kanban-filters { margin: 8px 0 14px; display: flex; gap: 18px; align-items: center; }
 .kanban-filters .kb-filter label { font-weight: bold; margin-right: 5px; color: #555; }
-.kanban-filters .kb-filter-checkbox label { cursor: pointer; }
-.kanban-filters .kb-filter-checkbox input[type="checkbox"] { vertical-align: middle; }
 
 .kanban-board {
   display: flex;

@@ -10,12 +10,12 @@ and recorded in the issue journal, respecting the tracker's workflow.
 
 - Per-project board, columns ordered by issue-status position
 - Current-week Close column plus read-only history columns for the previous four
-  ISO weeks (for example, `31W Close`)
+  ISO weeks (for example, `32 Close`, `31 Close`, …)
 - HTML5 drag-and-drop (no external JS lib), optimistic UI with revert on failure
 - Workflow-aware: only transitions allowed for the current user are accepted
 - Status change writes a proper journal entry (`status_id: old -> new`)
-- Filter by tracker and assignee; hide closed issues before the previous four weeks
-  (enabled by default)
+- Filter by tracker and assignee; closed issues before the previous four weeks
+  are always hidden
 - Cards show tracker, id, subject, assignee, target version, due date (overdue
   highlighted), priority accent, and progress bar
 - Permissions: `view_kanban` (read) and `manage_kanban` (move). Without
