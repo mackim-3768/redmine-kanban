@@ -9,10 +9,12 @@ and recorded in the issue journal, respecting the tracker's workflow.
 ## Features
 
 - Per-project board, columns ordered by issue-status position
+- Current-week Close column plus read-only history columns for the previous four
+  ISO weeks (for example, `31W Close`)
 - HTML5 drag-and-drop (no external JS lib), optimistic UI with revert on failure
 - Workflow-aware: only transitions allowed for the current user are accepted
 - Status change writes a proper journal entry (`status_id: old -> new`)
-- Filter by tracker and assignee; hide closed issues older than two weeks
+- Filter by tracker and assignee; hide closed issues before the previous four weeks
   (enabled by default)
 - Cards show tracker, id, subject, assignee, target version, due date (overdue
   highlighted), priority accent, and progress bar

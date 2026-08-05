@@ -1,10 +1,11 @@
 require 'redmine'
+require_relative 'lib/redmine_kanban/weekly_close_columns'
 
 Redmine::Plugin.register :redmine_kanban do
   name 'Redmine Kanban'
   author 'dgkim'
   description 'Notion-style Kanban board for Redmine projects. Drag-and-drop issues across status columns.'
-  version '0.1.0'
+  version '0.2.0'
   url 'https://github.com/dgkim/redmine_kanban'
   author_url 'https://github.com/dgkim'
 

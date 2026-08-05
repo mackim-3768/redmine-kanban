@@ -23,6 +23,8 @@ inline.
 ## Features
 
 - **Per-project board** — columns are issue statuses, ordered by status position
+- **Weekly Close history** — the regular Close column holds the current week;
+  the previous four ISO weeks appear in read-only `31W Close`-style columns
 - **Drag-and-drop** status changes (native HTML5, no JS dependency); optimistic
   UI with automatic revert on failure
 - **Workflow-aware** — only transitions allowed for the current user are accepted;
@@ -32,9 +34,9 @@ inline.
   `iframe` with Redmine's header/menu/sidebar/footer stripped, so editing and
   commenting work inline. `⤢` opens the full page in a new tab.
 - **Smart default filters** — tracker defaults to *all*, assignee defaults to the
-  *current user*, and closed issues older than two weeks are hidden by default;
-  all are adjustable. The assignee list always includes you plus anyone already
-  assigned, even when the project has no formal members.
+  *current user*, and closed issues before the previous four weeks are hidden by
+  default; all are adjustable. The assignee list always includes you plus anyone
+  already assigned, even when the project has no formal members.
 - **Rich cards** — tracker, id, subject, assignee, target version, due date
   (overdue highlighted), priority accent, progress bar
 - **Permissions** — `view_kanban` (read) and `manage_kanban` (move). Without

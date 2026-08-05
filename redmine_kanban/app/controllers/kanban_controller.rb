@@ -8,7 +8,8 @@ class KanbanController < ApplicationController
 
   def show
     @trackers = @project.trackers.sorted
-    @columns = build_columns
+    @recent_close_weeks = RedmineKanban::WeeklyCloseColumns.recent_weeks(Time.zone.today)
+    @columns = add_recent_close_columns(build_columns)
 
     # Defaults on first load (no filter submitted): tracker = all, assignee = me.
     # Once the filter form is submitted, params are present (empty string = "all").
@@ -33,7 +34,7 @@ class KanbanController < ApplicationController
     @issues_by_column = Hash.new { |h, k| h[k] = [] }
     unmapped = []
     scope.find_each do |issue|
-      key = status_to_col[issue.status_id]
+      key = recent_close_column_key(issue) || status_to_col[issue.status_id]
       key ? (@issues_by_column[key] << issue) : (unmapped << issue)
     end
 
@@ -88,18 +89,50 @@ class KanbanController < ApplicationController
 
   private
 
-  # Keep open issues and recently closed issues on the board. Closed issues
-  # without a closed_on value remain visible because their age is unknown.
+  # Keep open issues, the current week, and the previous four completed weeks.
+  # Closed issues without a closed_on value remain visible because their age is
+  # unknown.
   def hide_old_closed_issues(scope)
-    closed_status_ids = IssueStatus.where(is_closed: true).pluck(:id)
     return scope if closed_status_ids.empty?
 
     scope.where(
       'issues.status_id NOT IN (:closed_status_ids) ' \
-      'OR issues.closed_on IS NULL OR issues.closed_on > :cutoff',
+      'OR issues.closed_on IS NULL OR issues.closed_on >= :cutoff',
       closed_status_ids: closed_status_ids,
-      cutoff: 2.weeks.ago
+      cutoff: @recent_close_weeks.last[:start_on]
     )
+  end
+
+  # Insert four read-only history columns immediately after the last configured
+  # column that contains a closed status. The original closed column remains a
+  # drop target and holds issues closed during the current week.
+  def add_recent_close_columns(columns)
+    close_index = columns.rindex do |column|
+      (column[:status_ids] & closed_status_ids).any?
+    end
+    return columns unless close_index
+
+    history_columns = @recent_close_weeks.map do |week|
+      {
+        key: week[:key],
+        name: l(:label_kanban_week_close, week: format('%02d', week[:week])),
+        status_ids: [],
+        commit_id: nil
+      }
+    end
+    @recent_close_columns_enabled = true
+    columns.insert(close_index + 1, *history_columns)
+  end
+
+  def recent_close_column_key(issue)
+    return unless @recent_close_columns_enabled
+    return unless closed_status_ids.include?(issue.status_id)
+
+    RedmineKanban::WeeklyCloseColumns.key_for(issue.closed_on, @recent_close_weeks)
+  end
+
+  def closed_status_ids
+    @closed_status_ids ||= IssueStatus.where(is_closed: true).pluck(:id)
   end
 
   # Build the board columns. Without a configured column_map, every workflow
