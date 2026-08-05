@@ -24,7 +24,7 @@ inline.
 
 - **Per-project board** — columns are issue statuses, ordered by status position
 - **Weekly Close history** — the current and previous four ISO weeks appear as
-  `32 Close`, `31 Close`, … columns; previous-week columns are read-only
+  `32W Close`, `31W Close`, … columns; previous-week columns are read-only
 - **Drag-and-drop** status changes (native HTML5, no JS dependency); optimistic
   UI with automatic revert on failure
 - **Workflow-aware** — only transitions allowed for the current user are accepted;

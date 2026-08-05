@@ -5,7 +5,7 @@ Redmine::Plugin.register :redmine_kanban do
   name 'Redmine Kanban'
   author 'dgkim'
   description 'Notion-style Kanban board for Redmine projects. Drag-and-drop issues across status columns.'
-  version '0.2.1'
+  version '0.2.2'
   url 'https://github.com/dgkim/redmine_kanban'
   author_url 'https://github.com/dgkim'
 

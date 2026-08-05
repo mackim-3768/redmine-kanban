@@ -10,7 +10,7 @@ and recorded in the issue journal, respecting the tracker's workflow.
 
 - Per-project board, columns ordered by issue-status position
 - Current-week Close column plus read-only history columns for the previous four
-  ISO weeks (for example, `32 Close`, `31 Close`, …)
+  ISO weeks (for example, `32W Close`, `31W Close`, …)
 - HTML5 drag-and-drop (no external JS lib), optimistic UI with revert on failure
 - Workflow-aware: only transitions allowed for the current user are accepted
 - Status change writes a proper journal entry (`status_id: old -> new`)
